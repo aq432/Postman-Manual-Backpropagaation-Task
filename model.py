@@ -38,8 +38,31 @@ def getLoss(Prob,y):
 
     return loss
 
+def backward(cache, w2, y):
+    N = len(y)
+
+    dZ2 = cache["Prob"].copy()
+    dZ2[np.arange(N), y] -= 1.0
+    dZ2 /= N
+
+    dw2 = cache["A1"].T @ dZ2
+    db2 = np.sum(dZ2, axis=0, keepdims=True)
+
+    dA1 = dZ2 @ w2.T
+    dZ1 = dA1 * (cache["Z1"] > 0)
+
+    dw1 = cache["X"].T @ dZ1
+    db1 = np.sum(dZ1, axis=0, keepdims=True)
+
+    return dw1, db1, dw2, db2
+
+
 Prob, cache = forward(X, w1, b1, w2, b2)
 loss = getLoss(Prob, y)
+dw1, db1, dw2, db2 = backward(cache, w2, y)
 
 print("Loss:", loss)
-print("Cache:", list(cache.items()))
+print("dw1 shape:", dw1.shape, "(matches w1:", dw1.shape == w1.shape, ")")
+print("db1 shape:", db1.shape, "(matches b1:", db1.shape == b1.shape, ")")
+print("dw2 shape:", dw2.shape, "(matches w2:", dw2.shape == w2.shape, ")")
+print("db2 shape:", db2.shape, "(matches b2:", db2.shape == b2.shape, ")")
